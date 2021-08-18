@@ -13,7 +13,7 @@ import sys
 import inspect
 
 import pyodbc
-import numpy as numpy
+import numpy as np
 
 from pathlib import Path
 
@@ -53,13 +53,33 @@ class DB:
     def close(self):
         if self.dbcur:
             self.dbcur.close()
-            logger.debug("{} - closing DB cursor".format(fn))
+            logger.debug("closing DB cursor")
         if self.dbcon:
             self.dbcon.close()
-        logger.debug("{} - closing DB connection".format(fn))
+        logger.debug("closing DB connection")
     
-
-
+class DbDriver:
+  def __init__(self, **kwargs):
+    self.kwargs = kwargs
+    self.N = kwargs["N"]
+    self.M = kwargs["M"]
+    del self.kwargs["N"]
+    del self.kwargs["M"]
+    self.db = DB(**self.kwargs)
+    self.conn, self.cursor = self.db.connect()
+    
+    
+  
+  def run(self):
+    for i in range(self.N):
+      for j in range(self.M):
+        res = np.sqrt(j*np.sqrt(2))
+      queryString = f"INSERT INTO testtable (data1, data2, float1, name) VALUES ({i}, {j}, {res}, 'Sponges {i}_{j}');"
+      self.cursor.execute(queryString)
+      logger.info(queryString)
+    self.conn.commit()
+    self.db.close()
+    
 def main():
     config = {
         "host": "tcp:awta-iot-sql-server.database.windows.net",
@@ -70,8 +90,8 @@ def main():
         "driver": "{ODBC Driver 17 for SQL Server}"
     }
     
-    db = DB(**config)
-    db.connect()
+    dd = DbDriver(**config, N=10, M=5)
+    dd.run()
 
     # create database
     # queryString = """
@@ -80,27 +100,27 @@ def main():
     # db.query( queryString)
 
     # create table
-    fields = {
-        "data1": "INT",
-        "data2": "INT",
-        "float1": "FLOAT",
-        "name" : "CHAR(32)"
-    }
+    # fields = {
+        # "data1": "INT",
+        # "data2": "INT",
+        # "float1": "FLOAT",
+        # "name" : "CHAR(32)"
+    # }
 
-    queryString = "USE threadtest;"
-    db.query( queryString)
+    # queryString = "USE threadtest;"
+    # db.query( queryString)
        
-    queryString = "CREATE TABLE testtable (id INT IDENTITY(1,1) PRIMARY KEY, "+', '.join('{} {} NOT NULL'.format(k,v) for k,v in fields.items())+ ')'
+    # queryString = "CREATE TABLE IF NOT EXISTS testtable (id INT IDENTITY(1,1) PRIMARY KEY, "+', '.join('{} {} NOT NULL'.format(k,v) for k,v in fields.items())+ ')'
 
-    logger.info(queryString)
-    db.query(queryString)
+    # logger.info(queryString)
+    # db.query(queryString)
 
-    fieldNames = ",".join([""+str(i)+"" for i in list(fields.keys())])
+    # fieldNames = ",".join([""+str(i)+"" for i in list(fields.keys())])
 
-    queryString = f"INSERT INTO testtable ({fieldNames}) VALUES (1, 2, 0.3, 'Sponges');"
+    # queryString = f"INSERT INTO testtable ({fieldNames}) VALUES (1, 2, 0.3, 'Sponges');"
 
-    logger.info(queryString)
-    db.query(queryString)
+    # logger.info(queryString)
+    # db.query(queryString)
 
  
 
