@@ -63,12 +63,8 @@ class DbDriver:
     self.kwargs = kwargs
     self.N = kwargs["N"]
     self.M = kwargs["M"]
-    del self.kwargs["N"]
-    del self.kwargs["M"]
     self.db = DB(**self.kwargs)
     self.conn, self.cursor = self.db.connect()
-    
-    
   
   def run(self):
     for i in range(self.N):
