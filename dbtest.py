@@ -67,6 +67,7 @@ class DbDriver:
     self.conn, self.cursor = self.db.connect()
   
   def run(self):
+  '''do something that takes time  and push to database'''
     for i in range(self.N):
       for j in range(self.M):
         res = np.sqrt(j*np.sqrt(2))
